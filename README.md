@@ -13,32 +13,31 @@ curves;
 ### 1.1 TRPL data
 The TRPL raw data should be saved as matlab .mat file at "rawdata/SAMPLE_NAME.mat"
 following the structure below.
-
+``
  SAMPLE_NAME.mat
             |_lambda_alpha.mat
             |_CURVE_1.mat
             |_CURVE_2.mat (if you want to run a global fitting)
             |_ ...
+``
 
-The lambda_alpha.mat saves the excitation wavelength (nm), absorption
-coefficient at the excitation wavelength (cm^-1), emission wavelength(nm), 
-absorption coefficient at the emission wavelength (cm^-1) as the structure 
-below:
-
+The lambda_alpha.mat saves the excitation wavelength (nm), absorption coefficient at the excitation wavelength (cm^-1), emission wavelength(nm), absorption coefficient at the emission wavelength (cm^-1) as the structure below:
+``
 lambda_alpha.mat
           [column1,    column2]
 [row1]    [excitation_lambda_of_CURVE1, excitation_lambda_of_CURVE1 ...
 [row2]    [excitation_alpha_of_CURVE1 , excitation_alpha_of_CURVE1  ...
 [row3]    [emission_lambda_of_CURVE1  , emission_lambda_of_CURVE1   ...
 [row2]    [emission_alpha_of_CURVE1   , emission_alpha_of_CURVE1    ...
-
+``
 In each of the CURVE.mat file, experimental data are saved as below
-
+``
 CURVE.mat
       [column1,    column2]
       [time_step1, data_1 ]
       [time_step2, data_2 ]
       ....
+``
 ## 2. Main program
 ### 2.1 data_processing(cutoff_time, plot_tag, sampling_ratio)
       cutoff_time: The end time for the fitting curves, use the same time
