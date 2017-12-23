@@ -1,12 +1,12 @@
 # Introduction
 This program is used to extract material parameters from the TRPL-type
 data. Some features are summarized below:
-1. It can analyze the surface recombination velocity, bulk 
-   lifetime and diffusion coefficient;
-2. It supports 1D, 2D and 3D diffusion model;
-3. It supports single curve fitting and global fitting among several
+- It can analyze the surface recombination velocity, bulk 
+   lifetime and diffusion coefficient;
+- It supports 1D, 2D and 3D diffusion model;
+- It supports single curve fitting and global fitting among several
 curves;
-4. All fitting results will be saved automatically in CSV files
+- All fitting results will be saved automatically in CSV files
 
 # How to use
 1. Raw data preparation
