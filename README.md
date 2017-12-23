@@ -11,13 +11,12 @@ data. Some features are summarized below:
 ### 1.1 TRPL data
 The TRPL raw data should be saved as matlab .mat file at *rawdata/SAMPLE_NAME.mat* following the structure below.
 
-``
-SAMPLE_NAME.mat  
-+-lambda_alpha.mat  
-+-CURVE_1.mat  
-+-CURVE_2.mat (if you want to run a global fitting)  
+
+`SAMPLE_NAME.mat`  
++-`lambda_alpha.mat`  
++-`CURVE_1.mat`  
++-`CURVE_2.mat (if you want to run a global fitting)`  
 +- ...
-``
 
 The lambda_alpha.mat saves the excitation wavelength (nm), absorption coefficient at the excitation wavelength (cm^-1), emission wavelength(nm), absorption coefficient at the emission wavelength (cm^-1) as the structure below:
 
