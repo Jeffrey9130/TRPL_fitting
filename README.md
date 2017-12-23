@@ -6,6 +6,9 @@ data. Some features are summarized below:
 - It supports single curve fitting and global fitting among several curves;
 - All fitting results will be saved automatically in CSV files
 
+# Dependence
+You need to install matlab toolbox `v2struct`.
+
 # How to use
 ## 1. Raw data preparation
 ### 1.1 TRPL data
