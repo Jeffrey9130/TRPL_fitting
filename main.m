@@ -1,6 +1,9 @@
 clc
 clear
-postdata = data_processing(100e-9, 0, 0.5);
+
+serise_name = 'twodt_60au';
+
+postdata = data_processing(serise_name,15e-9, 1, 1);
 
 %% Control parameters
 % Consider in-plane diffusion correction (full 3D diffusion)
@@ -11,34 +14,33 @@ plot_tag = 0;
 save_tag = 1;
 % Refine the fitting result based on the last fitting
 refine_tag = 1;
-if ~exist('output/p.mat','file')
+if ~exist('output/p.mat','file') && refine_tag 
     error('No previous fitting result exist, set the refine_tag = 0')
 end
 % Start point index of the PL signal, only those after this point will be
 % used for the error estimation
 pro_index = 1;
 % Thickness of the sample
-L = 300e-7;            % unit cm
-% Number of global parameters
-num_global = 3;
+L = 200e-7;            % unit cm
+% Number of private parameters
+num_private = 3;
 % Centralization factor for each fitting parameter
 c_S1 = 1e3;
 c_S2 = 0;    % set 0 to disable this parameter
 c_Amp = 1;
 c_offset = 1;
-c_D = 1e-2;
-c_tau = 1e-6;
-c_small_alpha = 0.5; % set the acutal small_alpha value here !
+c_D = 1e-3;
+c_tau = 1e-8;
+c_small_alpha = 1;
 % Fitting boundary and initial value of each parameter, set the lower
 % boundary equal to the upper bounary to freeze the parameter
-l_S1 = 0.05;            p0_S1 = 0.3;            u_S1 = 0.5;
+l_S1 = 0;               p0_S1 = 1;              u_S1 = 5;
 l_S2 = 0;               p0_S2 = 0;              u_S2 = 0;
 l_D = 1e-3;             p0_D = 1;               u_D = 10;
-                                                u_Amp = 2;  % Amp use the exp_pl(1) as ld and p0
+l_Amp = 0;              p0_Amp = 1;             u_Amp = 10;  % Amp use the exp_pl(1) as ld and p0
 % no ld, p0 and ud for offset, read from exp_pl
-l_tau = 1e-3;           p0_tau = 2.5;           u_tau = 100;
-l_small_alpha = 1;      p0_small_alpha = 1;     u_small_alpha = 1;
-                     
+l_tau = 0.01;           p0_tau = 2.5;           u_tau = 10;
+l_small_alpha = 0;      p0_small_alpha = 0.5;   u_small_alpha = 1;                     
 
 %% Initialize the parameters
 % Stability condition for 1D diffusion dt <= 1/2*dx^2/D
@@ -54,7 +56,7 @@ end
 data_vol = length(postdata);
 
 % Define the fitting parameters, all the parameters below will be used in
-% the fitting, the frist num_global paramters will be used as the global
+% the fitting, the frist num_private paramters will be used as the global
 % fitting paramters
 % 'tau': bulk liftime
 % 'D': diffusion coeffient
@@ -64,7 +66,10 @@ data_vol = length(postdata);
 % 'offset': y-offset of the curve
 % 'small_alpha': smooth parameter of the initialized carrier distribution.
 % See pdex1ic.m for more details.
-pname= {'tau','Amp','offset','D','S1','S2','small_alpha'};
+
+%pname= {'tau','Amp','offset','small_alpha','D','S1','S2',};
+pname= {'S1','Amp','offset','small_alpha','D','tau','S2',};
+
 central_factor = struct('S1',c_S1,...
                         'S2',c_S2,...
                         'Amp',c_Amp,...
@@ -77,15 +82,15 @@ central_factor = struct('S1',c_S1,...
 % vector p, use the index saved in the p_pointer to indicate the meaning of
 % these parameters
 pointer_index = 1; 
-% global index
+% private index
 for i = 1:data_vol
-    for j = 1:num_global
+    for j = 1:num_private
         p_pointer(i).(pname{j}) = pointer_index;
         pointer_index = pointer_index + 1;
     end
 end
-% private index
-for i = num_global+1 : length(pname)
+% global index
+for i = num_private+1 : length(pname)
     for j = 1:data_vol
         p_pointer(j).(pname{i}) = pointer_index;
     end 
@@ -93,12 +98,12 @@ for i = num_global+1 : length(pname)
 end
 pointer_index = pointer_index-1;
 
-% Shuffle the random seed
-rng shuffle
 % Initlize the parameters by random number
 if refine_tag == 0
     for i = 1 : pointer_index
-        p0(i) = rand*10;
+        % Shuffle the random seed
+        rng shuffle
+        p0(i) = rand;
     end
 else
     load('output/p.mat');
@@ -117,8 +122,8 @@ for i = 1:data_vol
     UD(p_pointer(i).S1) = u_S1;
     LD(p_pointer(i).S1) = l_S1;
     
-    UD(p_pointer(i).Amp) = u_Amp-postdata(i).offset;
-    LD(p_pointer(i).Amp) = postdata(i).exp_pl(1)-postdata(i).offset;
+    UD(p_pointer(i).Amp) = u_Amp;
+    LD(p_pointer(i).Amp) = l_Amp;
     
     UD(p_pointer(i).offset) = postdata(i).offset;
     LD(p_pointer(i).offset) = postdata(i).offset;
@@ -132,14 +137,14 @@ for i = 1:data_vol
     UD(p_pointer(i).small_alpha) = u_small_alpha;
     LD(p_pointer(i).small_alpha) = l_small_alpha;
      
-    if refine_tag == 0
-     p0(p_pointer(i).S1) = p0_S1;
-     p0(p_pointer(i).Amp) = postdata(i).exp_pl(1)-postdata(i).offset;
-     p0(p_pointer(i).offset) = postdata(i).offset;
-     p0(p_pointer(i).D) = p0_D;
-     p0(p_pointer(i).tau) = p0_tau;
-     p0(p_pointer(i).small_alpha) = p0_small_alpha;
-    end
+%     if refine_tag == 0
+%      p0(p_pointer(i).S1) = p0_S1;
+%      p0(p_pointer(i).Amp) = postdata(i).exp_pl(1)-postdata(i).offset;
+%      p0(p_pointer(i).offset) = postdata(i).offset;
+%      p0(p_pointer(i).D) = p0_D;
+%      p0(p_pointer(i).tau) = p0_tau;
+%      p0(p_pointer(i).small_alpha) = p0_small_alpha;
+%     end
 
 end
 
@@ -153,7 +158,7 @@ options = optimoptions('fmincon', ...
                        'UseParallel',0);
 
 % Test using the inital guesses                
-test = dummy_global(p0,p_pointer,central_factor,postdata,z,pro_index,in_plane_tag,1,1);
+test = dummy_global(p0,p_pointer,central_factor,postdata,z,pro_index,in_plane_tag,1,0);
 disp('Check the dummy curves, press enter to continue...');
 pause
 disp('Run fitting...')
@@ -175,4 +180,4 @@ end
 result_tab = struct2table(result);
 result_tab.Properties.RowNames = sample_names
 disp('Save results...')
-writetable(result_tab,'output/fitting_result.csv');
+writetable(result_tab,['output/',serise_name,'_fitting_result.csv']);

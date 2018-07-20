@@ -70,17 +70,17 @@ for i = 1:data_vol
     % Amend the PL curve by the amplitude and offset
     dummy_pl = (dummy_pl/max(dummy_pl)*Amp + offset);   
     % Calculate the error by the LSM
-    err = err + sum((tempdata.exp_pl(pro_index:tempdata.end_index)-dummy_pl(pro_index:tempdata.end_index)).^2);
+    err = err + sum((tempdata.exp_pl(pro_index:end)-dummy_pl(pro_index:end)).^2);
       
     % Plot the curve if necessary
     if plot_tag == 1
         figure(10)
         subplot(data_vol,1,i)
         % experimental PL
-        plot(t(1:tempdata.end_index)*1e9,tempdata.exp_pl(1:tempdata.end_index),'o')
+        plot(t(1:end)*1e9,tempdata.exp_pl(1:end),'o')
         hold on
         % Simulated PL
-        plot(t(1:tempdata.end_index)*1e9,dummy_pl(1:tempdata.end_index))
+        plot(t(1:end)*1e9,dummy_pl(1:end))
         hold off
         title(postdata(i).name)
         xlabel('Time (ns)')
@@ -95,10 +95,11 @@ for i = 1:data_vol
     
     % Save the data if necessary
     if save_tag == 1
-        curve_exp = [t(1:tempdata.end_index)*1e9,tempdata.exp_pl(1:tempdata.end_index)];
-        csvwrite('output/curve_exp.csv',curve_exp);
-        curve_sim = [t(1:tempdata.end_index)*1e9,dummy_pl(1:tempdata.end_index)];
-        csvwrite('output/curve_sim.csv',curve_exp);
+        curve_exp = [t(1:end)*1e9,tempdata.exp_pl(1:end)];
+        xlswrite(['output/',postdata(i).serise_name],curve_exp,[postdata(i).name,'_exp_data']);
+        curve_sim = [t(1:end)*1e9,dummy_pl(1:end)];
+        xlswrite(['output/',postdata(i).serise_name],curve_sim,[postdata(i).name,'_sim_data']);
+        %csvwrite('output/curve_sim.csv',curve_exp);
         save('output/p.mat','p');
     end
 
